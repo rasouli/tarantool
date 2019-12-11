@@ -702,6 +702,22 @@ local function load_cfg(cfg)
     box_configured = nil
 
     box_is_configured = true
+
+    -- Check if schema version matches Tarantool version
+    -- and print warning if it's not (in case user forgot to call box.schema.upgrade())
+    local version = box.space._schema:get{'version'}
+    if version ~= nil then
+        local needs, schema_version_str = private.schema_needs_upgrade()
+        local tarantool_version_str = box.info.version
+        if needs then
+            -- Print the warning
+            local msg = string.format(
+                'Your schema version is %s while Tarantool %s requires a more'..
+                ' recent schema version. Please, consider using box.'..
+                'schema.upgrade().', schema_version_str, tarantool_version_str)
+            log.warn(msg)
+        end
+    end
 end
 box.cfg = locked(load_cfg)
 
