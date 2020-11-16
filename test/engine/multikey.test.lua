@@ -46,7 +46,7 @@ arr_idx:select({1})
 idx:select()
 -- Snapshot & recovery.
 box.snapshot()
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 s = box.space["withdata"]
 idx = s.index["idx"]
 arr_idx = s.index["arr_idx"]
@@ -98,7 +98,7 @@ idx0:select()
 s:update(1, {{'=', 2, {20, 10, 30, 30}}})
 idx0:select()
 box.snapshot()
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 s = box.space.withdata
 s:select()
 idx0 = s.index.idx0
@@ -146,7 +146,7 @@ s:replace({2, {{fname='A2_3'}, {fname='B2_3', name='ZB2_3'}, {fname='C2_3'}, {na
 s:replace({2, {{fname='A2_4'}, {fname='B2_4', name='ZB2_4'}, {fname='C2_4'}, {name="DUP"}, {name='CONFLICT2'}, {name='CONFLICT1'}, {name="DUP"}}})
 idx0:select()
 box.snapshot()
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 s = box.space.withdata
 idx0 = s.index.idx0
 s:select()
@@ -174,7 +174,7 @@ s:replace({1, {{fname='A5', name='ZA5'}, {fname='B5'}, {fname='C5'}, {name="DUP"
 idx0:select()
 s:select()
 box.snapshot()
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 s = box.space.withdata
 idx0 = s.index.idx0
 s:select()

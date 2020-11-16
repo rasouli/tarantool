@@ -17,7 +17,7 @@ for i = 1, 10 do box.space.loc:replace{i} end
 
 box.snapshot()
 
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 
 -- Could hang if the limbo would incorrectly handle the snapshot end.
 box.space.sync:replace{11}

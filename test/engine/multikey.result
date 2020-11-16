@@ -161,7 +161,7 @@ box.snapshot()
 ---
 - ok
 ...
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 s = box.space["withdata"]
 ---
 ...
@@ -328,7 +328,7 @@ box.snapshot()
 ---
 - ok
 ...
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 s = box.space.withdata
 ---
 ...
@@ -514,7 +514,7 @@ box.snapshot()
 ---
 - ok
 ...
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 s = box.space.withdata
 ---
 ...
@@ -663,7 +663,7 @@ box.snapshot()
 ---
 - ok
 ...
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 s = box.space.withdata
 ---
 ...

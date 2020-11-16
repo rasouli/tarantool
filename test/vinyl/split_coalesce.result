@@ -80,7 +80,7 @@ _ = var:insert{'keys_per_range', keys_per_range}
 ---
 ...
 -- Check that the space can be recovered after splitting ranges.
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 fiber = require 'fiber'
 ---
 ...

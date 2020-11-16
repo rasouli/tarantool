@@ -5,7 +5,7 @@ env = require('test_run')
 test_run = env.new()
 ---
 ...
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 engine = test_run:get_cfg('engine')
 ---
 ...
@@ -19,7 +19,7 @@ space:insert({0})
 ---
 - [0]
 ...
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 space = box.space['test']
 ---
 ...
@@ -33,7 +33,7 @@ index:select({}, {iterator = box.index.ALL})
 for key = 1, 1000 do space:insert({key}) end
 ---
 ...
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 space = box.space['test']
 ---
 ...
@@ -1047,4 +1047,4 @@ index:select({}, {iterator = box.index.ALL})
 space:drop()
 ---
 ...
-test_run:cmd('restart server default with cleanup=1')
+test_run:cmd('restart server default with signal=KILL, cleanup=1')

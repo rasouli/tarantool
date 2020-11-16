@@ -264,7 +264,7 @@ test_run:cleanup_cluster()
 ---
 ...
 -- Check that the garbage collector vclock is recovered correctly.
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 gc = box.info.gc()
 ---
 ...

@@ -29,7 +29,7 @@ box.snapshot()
 ---
 - ok
 ...
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 box.execute('DROP INDEX i ON j3')
 ---
 - null
@@ -44,7 +44,7 @@ box.snapshot()
 ---
 - ok
 ...
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 box.execute('DROP INDEX i ON j3')
 ---
 - row_count: 1

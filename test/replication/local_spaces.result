@@ -317,7 +317,7 @@ box.space.test3:select()
   - [2, 2, 2]
   - [3, 3, 3]
 ...
-test_run:cmd("restart server replica")
+test_run:cmd("restart server replica with signal=KILL")
 box.space.test1:select()
 ---
 - - [1]

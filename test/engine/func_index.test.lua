@@ -176,7 +176,7 @@ idx:select({501})
 idx:select({502})
 idx:select({503})
 box.snapshot()
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 s = box.space.withdata
 idx = s.index.idx
 idx:select({501})

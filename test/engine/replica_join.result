@@ -490,7 +490,7 @@ test_run:cmd("start server replica")
 test_run:wait_lsn('replica', 'default')
 ---
 ...
-test_run:cmd('restart server replica')
+test_run:cmd('restart server replica with signal=KILL')
 ---
 - true
 ...

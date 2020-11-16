@@ -8,19 +8,19 @@
 --
 env = require('test_run')
 test_run = env.new()
-test_run:cmd('restart server default with cleanup=1')
+test_run:cmd('restart server default with signal=KILL,cleanup=1')
 
 box.error.injection.set("ERRINJ_WAL_WRITE", true)
 box.space._schema:insert{"key"}
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 box.space._schema:insert{"key"}
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 box.space._schema:get{"key"}
 box.space._schema:delete{"key"}
 -- list all the logs
 name = string.match(arg[0], "([^,]+)%.lua")
 require('fio').glob(name .. "/*.xlog")
-test_run:cmd('restart server default with cleanup=1')
+test_run:cmd('restart server default with signal=KILL,cleanup=1')
 
 -- gh-881 iproto request with wal IO error
 errinj = box.error.injection

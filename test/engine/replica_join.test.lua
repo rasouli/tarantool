@@ -126,7 +126,7 @@ for i = 0, 9 do space:insert({i, 'test' .. tostring(i)}) end
 test_run:cmd("deploy server replica")
 test_run:cmd("start server replica")
 test_run:wait_lsn('replica', 'default')
-test_run:cmd('restart server replica')
+test_run:cmd('restart server replica with signal=KILL')
 test_run:cmd('switch replica')
 box.space.test:select()
 test_run:cmd('switch default')

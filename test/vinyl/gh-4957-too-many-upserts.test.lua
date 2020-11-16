@@ -55,6 +55,6 @@ s:drop()
 -- restart the current server to resolve the issue #5141
 -- which reproduced in test:
 --   vinyl/gh-5141-invalid-vylog-file.test.lua
-test_run:cmd("restart server default with cleanup=True")
+test_run:cmd("restart server default with signal=KILL, cleanup=True")
 
 

@@ -7,5 +7,5 @@ s = box.schema.space.create('sync', {is_sync = true})
 _ = s:create_index('pk')
 s:insert{1}
 box.snapshot()
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 box.space.sync:drop()

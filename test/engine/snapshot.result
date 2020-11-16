@@ -5,7 +5,7 @@ env = require('test_run')
 test_run = env.new()
 ---
 ...
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 engine = test_run:get_cfg('engine')
 ---
 ...
@@ -22,7 +22,7 @@ box.snapshot()
 ---
 - ok
 ...
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 space = box.space['test']
 ---
 ...
@@ -90,7 +90,7 @@ box.snapshot()
 ---
 - ok
 ...
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 space = box.space['test']
 ---
 ...
@@ -219,7 +219,7 @@ box.snapshot()
 ---
 - ok
 ...
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 box.space.test:select{}
 ---
 - - [1, 11, 21]
@@ -240,7 +240,7 @@ box.space.test:drop()
 ...
 -- Hard way to flush garbage slabs in the fiber's region. See
 -- gh-4750.
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 -- Check that box.snapshot() doesn't leave garbage one the region.
 -- https://github.com/tarantool/tarantool/issues/3732
 fiber = require('fiber')

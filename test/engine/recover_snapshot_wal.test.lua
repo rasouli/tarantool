@@ -2,7 +2,7 @@ env = require('test_run')
 test_run = env.new()
 -- write data recover from latest snapshot and logs
 
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 
 engine = test_run:get_cfg('engine')
 space = box.schema.space.create('test', { engine = engine })
@@ -12,7 +12,7 @@ space:insert({0})
 box.snapshot()
 space:insert({33001})
 
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 
 space = box.space['test']
 index = space.index['primary']
@@ -33,7 +33,7 @@ for key = 352, 33000 do                                         \
 end                                                             \
 box.commit()
 
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 
 space = box.space['test']
 index = space.index['primary']
@@ -50,4 +50,4 @@ i
 err
 
 space:drop()
-test_run:cmd("restart server default with cleanup=1")
+test_run:cmd("restart server default with signal=KILL, cleanup=1")

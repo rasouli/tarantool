@@ -113,7 +113,7 @@ box.schema.user.revoke('guest', 'replication')
 test_run:cleanup_cluster()
 
 -- Check that the garbage collector vclock is recovered correctly.
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 gc = box.info.gc()
 #gc.checkpoints -- 2
 gc.signature == gc.checkpoints[2].signature

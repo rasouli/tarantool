@@ -5,7 +5,7 @@ test_run = env.new()
 ---
 ...
 -- write data recover from latest snapshot and logs
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 engine = test_run:get_cfg('engine')
 ---
 ...
@@ -27,7 +27,7 @@ space:insert({33001})
 ---
 - [33001]
 ...
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 space = box.space['test']
 ---
 ...
@@ -60,7 +60,7 @@ end                                                             \
 box.commit()
 ---
 ...
-test_run:cmd("restart server default")
+test_run:cmd("restart server default with signal=KILL")
 space = box.space['test']
 ---
 ...
@@ -93,4 +93,4 @@ err
 space:drop()
 ---
 ...
-test_run:cmd("restart server default with cleanup=1")
+test_run:cmd("restart server default with signal=KILL, cleanup=1")

@@ -11,14 +11,14 @@ box.execute('DROP INDEX i ON j3')
 
 -- Make sure that no artifacts remain after restart.
 box.snapshot()
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 box.execute('DROP INDEX i ON j3')
 
 box.execute('CREATE INDEX i ON j3 (s1)')
 
 -- Check that _index was altered properly
 box.snapshot()
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
 
 box.execute('DROP INDEX i ON j3')
 

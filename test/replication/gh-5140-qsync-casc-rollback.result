@@ -168,7 +168,7 @@ test_run:switch('default')
 -- Key to reproduce the cascading rollback not done is to restart. On restart
 -- all the records are replayed one be one without yields for WAL writes, and
 -- nothing should change.
-test_run:cmd('restart server default')
+test_run:cmd('restart server default with signal=KILL')
  | 
 test_run:cmd('restart server replica')
  | ---
