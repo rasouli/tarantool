@@ -40,6 +40,7 @@
 #include "engine.h"
 #include "xlog.h"
 #include "salad/stailq.h"
+#include "system_allocator.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -49,6 +50,7 @@ struct index;
 struct fiber;
 struct tuple;
 struct tuple_format;
+struct allocator;
 
 /**
  * The state of memtx recovery process.
@@ -136,7 +138,11 @@ struct memtx_engine {
 	/** Slab cache for allocating tuples. */
 	struct slab_cache slab_cache;
 	/** Tuple allocator. */
-	struct small_alloc alloc;
+	struct small_alloc small_alloc;
+	/** Tuple allocator. */
+	struct system_alloc system_alloc;
+	/** Pointer to used tuple allocator */
+	void *alloc;
 	/** Slab cache for allocating index extents. */
 	struct slab_cache index_slab_cache;
 	/** Index extent allocator. */
@@ -213,7 +219,7 @@ struct memtx_engine *
 memtx_engine_new(const char *snap_dirname, bool force_recovery,
 		 uint64_t tuple_arena_max_size,
 		 uint32_t objsize_min, bool dontdump,
-		 float alloc_factor);
+		 const char *allocator, float alloc_factor);
 
 int
 memtx_engine_recover_snapshot(struct memtx_engine *memtx,
@@ -246,12 +252,14 @@ void
 memtx_leave_delayed_free_mode(struct memtx_engine *memtx);
 
 /** Allocate a memtx tuple. @sa tuple_new(). */
-struct tuple *
-memtx_tuple_new(struct tuple_format *format, const char *data, const char *end);
+typedef struct tuple *
+(*global_memtx_tuple_new)(struct tuple_format *format, const char *data, const char *end);
+extern global_memtx_tuple_new memtx_tuple_new;
 
 /** Free a memtx tuple. @sa tuple_delete(). */
-void
-memtx_tuple_delete(struct tuple_format *format, struct tuple *tuple);
+typedef void
+(*global_memtx_tuple_delete)(struct tuple_format *format, struct tuple *tuple);
+extern global_memtx_tuple_delete memtx_tuple_delete;
 
 /** Tuple format vtab for memtx engine. */
 extern struct tuple_format_vtab memtx_tuple_format_vtab;
@@ -299,13 +307,13 @@ static inline struct memtx_engine *
 memtx_engine_new_xc(const char *snap_dirname, bool force_recovery,
 		    uint64_t tuple_arena_max_size,
 		    uint32_t objsize_min, bool dontdump,
-		    float alloc_factor)
+		    const char *allocator, float alloc_factor)
 {
 	struct memtx_engine *memtx;
 	memtx = memtx_engine_new(snap_dirname, force_recovery,
 				 tuple_arena_max_size,
 				 objsize_min, dontdump,
-				 alloc_factor);
+				 allocator, alloc_factor);
 	if (memtx == NULL)
 		diag_raise();
 	return memtx;
