@@ -53,6 +53,7 @@ double replication_connect_timeout = 30.0; /* seconds */
 int replication_connect_quorum = REPLICATION_CONNECT_QUORUM_ALL;
 double replication_sync_lag = 10.0; /* seconds */
 int replication_synchro_quorum = 1;
+bool replication_synchro_quorum_eval = false;
 double replication_synchro_timeout = 5.0; /* seconds */
 double replication_sync_timeout = 300.0; /* seconds */
 bool replication_skip_conflict = false;
@@ -98,6 +99,36 @@ replication_synchro_quorum_update(int value)
 	replication_synchro_quorum = value;
 	txn_limbo_on_parameters_change(&txn_limbo);
 	raft_cfg_election_quorum(box_raft());
+}
+
+/**
+ * Evaluate the new synchro quorum number when replica
+ * get registered/unregistered and the quorum depends on
+ * their amount via formula in config.
+ */
+void
+replication_on_cluster_update(void)
+{
+	if (!replication_synchro_quorum_eval)
+		return;
+
+	/*
+	 * Account only registered replicas when evaluating
+	 * quorum number from a fromula present in config.
+	 */
+	int value = replicaset.registered_count - replicaset.anon_count;
+	int quorum = eval_replication_synchro_quorum(value);
+
+	/*
+	 * Upon node bootstrap we verify configuration so there
+	 * must never be a value out of bounds, still better to
+	 * be sure since evaluation code lays far from here.
+	 */
+	if (quorum <= 0 || quorum >= VCLOCK_MAX)
+		panic("Unexpected result for replication_synchro_quorum eval");
+
+	say_info("replication: evaluated quorum is %d", quorum);
+	replication_synchro_quorum_update(quorum);
 }
 
 void

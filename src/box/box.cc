@@ -634,14 +634,6 @@ box_check_replication_synchro_quorum(void)
 		 */
 		int value = replication_synchro_quorum;
 		quorum = eval_replication_synchro_quorum(value);
-		/*
-		 * FIXME: Until we get full support.
-		 */
-		diag_set(ClientError, ER_CFG,
-			 "replication_synchro_quorum",
-			 "symbolic evaluation is not yet supported");
-		diag_log();
-		quorum = -1;
 	} else {
 		quorum = cfg_geti("replication_synchro_quorum");
 	}
@@ -1004,6 +996,9 @@ box_set_replication_synchro_quorum(void)
 	int value = box_check_replication_synchro_quorum();
 	if (value < 0)
 		return -1;
+
+	bool isnumber = cfg_isnumber("replication_synchro_quorum");
+	replication_synchro_quorum_eval = !isnumber;
 	replication_synchro_quorum_update(value);
 	return 0;
 }

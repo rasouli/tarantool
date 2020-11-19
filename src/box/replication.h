@@ -132,6 +132,12 @@ extern double replication_sync_lag;
 extern int replication_synchro_quorum;
 
 /**
+ * A flag to point that replication_synchro_quorum needs
+ * to be evaluated as a formula.
+ */
+extern bool replication_synchro_quorum_eval;
+
+/**
  * Time in seconds which the master node is able to wait for ACKs
  * for a synchronous transaction until it is rolled back.
  */
@@ -177,6 +183,9 @@ replication_disconnect_timeout(void)
 
 void
 replication_synchro_quorum_update(int value);
+
+void
+replication_on_cluster_update(void);
 
 void
 replication_init(void);

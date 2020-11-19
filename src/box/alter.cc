@@ -4196,6 +4196,7 @@ register_replica(struct trigger *trigger, void * /* event */)
 	} else {
 		try {
 			replica = replicaset_add(id, &uuid);
+			replication_on_cluster_update();
 			/* Can't throw exceptions from on_commit trigger */
 		} catch(Exception *e) {
 			panic("Can't register replica: %s", e->errmsg);
@@ -4216,6 +4217,7 @@ unregister_replica(struct trigger *trigger, void * /* event */)
 	struct replica *replica = replica_by_uuid(&old_uuid);
 	assert(replica != NULL);
 	replica_clear_id(replica);
+	replication_on_cluster_update();
 	return 0;
 }
 
