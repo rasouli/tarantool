@@ -562,10 +562,90 @@ box_check_replication_sync_lag(void)
 	return lag;
 }
 
+/**
+ * Evaluate replicaion syncro quorum number from a formula.
+ */
+int
+eval_replication_synchro_quorum(int nr_replicas)
+{
+	const char fmt[] =
+		"local f, err = loadstring(\"return (%s)\")\n"
+		"if not f then return 'failed to load \"%s\"' end\n"
+		"setfenv(f, { n = %d })\n"
+		"local ok, res = pcall(f)\n"
+		"if not ok then return res end\n"
+		"return math.floor(res)\n";
+	char buf[512];
+	int value = -1;
+
+	errno = 0;
+
+	const char *expr = cfg_gets("replication_synchro_quorum");
+	size_t ret = snprintf(buf, sizeof(buf), fmt, expr,
+			      expr, nr_replicas);
+	if (ret >= sizeof(buf)) {
+		errno = EINVAL;
+		diag_set(ClientError, ER_CFG,
+			 "replication_synchro_quorum",
+			 "the expression is too big");
+		return -1;
+	}
+
+	luaL_loadstring(tarantool_L, buf);
+	lua_call(tarantool_L, 0, 1);
+
+	if (lua_isnumber(tarantool_L, -1)) {
+		value = (int)lua_tonumber(tarantool_L, -1);
+	} else {
+		assert(lua_isstring(tarantool_L, -1));
+		errno = EINVAL;
+		diag_set(ClientError, ER_CFG,
+			 "replication_synchro_quorum",
+			 lua_tostring(tarantool_L, -1));
+	}
+	lua_pop(tarantool_L, 1);
+	return value;
+}
+
 static int
 box_check_replication_synchro_quorum(void)
 {
-	int quorum = cfg_geti("replication_synchro_quorum");
+	int quorum = 0;
+
+	if (!cfg_isnumber("replication_synchro_quorum")) {
+		/*
+		 * When validating a formula it must return a
+		 * positive value for a single node and maximum
+		 * possible replicas because the quorum will be
+		 * evaluated on each new replica registration,
+		 * starting from a single node.
+		 */
+		int v[] = {1, VCLOCK_MAX-1};
+		for (size_t i = 0; i < lengthof(v); i++) {
+			quorum = eval_replication_synchro_quorum(v[i]);
+			if (quorum < 0 && errno == EINVAL)
+				return -1;
+		}
+
+		/*
+		 * Once syntax is valid we should pass the real
+		 * default value from replication module itself
+		 * to evaluate the actual value to use.
+		 */
+		int value = replication_synchro_quorum;
+		quorum = eval_replication_synchro_quorum(value);
+		/*
+		 * FIXME: Until we get full support.
+		 */
+		diag_set(ClientError, ER_CFG,
+			 "replication_synchro_quorum",
+			 "symbolic evaluation is not yet supported");
+		diag_log();
+		quorum = -1;
+	} else {
+		quorum = cfg_geti("replication_synchro_quorum");
+	}
+
 	if (quorum <= 0 || quorum >= VCLOCK_MAX) {
 		diag_set(ClientError, ER_CFG, "replication_synchro_quorum",
 			 "the value must be greater than zero and less than "
