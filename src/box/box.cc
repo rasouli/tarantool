@@ -562,10 +562,81 @@ box_check_replication_sync_lag(void)
 	return lag;
 }
 
+/**
+ * Evaluate replication syncro quorum number from a formula.
+ */
+static int
+eval_replication_synchro_quorum(int nr_replicas)
+{
+	const char fmt[] =
+		"local f, err = loadstring(\"return (%s)\")\n"
+		"if not f then return 'failed to load \"%s\"' end\n"
+		"setfenv(f, { n = %d })\n"
+		"local ok, res = pcall(f)\n"
+		"if not ok then return res end\n"
+		"return math.floor(res)\n";
+	char buf[512];
+	int value = -1;
+
+	const char *expr = cfg_gets("replication_synchro_quorum");
+	size_t ret = snprintf(buf, sizeof(buf), fmt, expr,
+			      expr, nr_replicas);
+	if (ret >= sizeof(buf)) {
+		diag_set(ClientError, ER_CFG,
+			 "replication_synchro_quorum",
+			 "the expression is too big");
+		return -1;
+	}
+
+	luaL_loadstring(tarantool_L, buf);
+	lua_call(tarantool_L, 0, 1);
+
+	if (lua_isnumber(tarantool_L, -1)) {
+		value = (int)lua_tonumber(tarantool_L, -1);
+	} else {
+		diag_set(ClientError, ER_CFG,
+			 "replication_synchro_quorum",
+			 lua_tostring(tarantool_L, -1));
+		return -1;
+	}
+	lua_pop(tarantool_L, 1);
+
+	/*
+	 * At least we should have 1 node to sync, thus
+	 * if the formula has evaluated to some negative
+	 * value (say it was n-2) do not treat it as an
+	 * error but just yield a minimum valid magnitude.
+	 */
+	if (value < 0) {
+		say_warn("replication_synchro_quorum evaluated "
+			 "to the negative value %d, ignore", value);
+	}
+	return MAX(1, MIN(value, VCLOCK_MAX-1));
+}
+
 static int
 box_check_replication_synchro_quorum(void)
 {
-	int quorum = cfg_geti("replication_synchro_quorum");
+	int quorum = 0;
+
+	if (!cfg_isnumber("replication_synchro_quorum")) {
+		/*
+		 * The formula uses symbolic name 'n' as
+		 * a number of currently registered replicas
+		 * thus lets pass a sane value here.
+		 *
+		 * Note though at moment of bootstrap this value
+		 * is zero but the evaluator will return a valid
+		 * number back, we rather use this variable in
+		 * a sake of "sense" pointing out that we're
+		 * depending on number of replicas.
+		 */
+		int value = replicaset.registered_count;
+		quorum = eval_replication_synchro_quorum(value);
+	} else {
+		quorum = cfg_geti("replication_synchro_quorum");
+	}
+
 	if (quorum <= 0 || quorum >= VCLOCK_MAX) {
 		diag_set(ClientError, ER_CFG, "replication_synchro_quorum",
 			 "the value must be greater than zero and less than "
@@ -918,16 +989,52 @@ box_set_replication_sync_lag(void)
 	replication_sync_lag = box_check_replication_sync_lag();
 }
 
+/**
+ * Assign new replication_synchro_quorum value
+ * and notify dependent subsystems.
+ */
+static void
+set_replication_synchro_quorum(int quorum)
+{
+	assert(quorum > 0 && quorum < VCLOCK_MAX);
+
+	replication_synchro_quorum = quorum;
+	txn_limbo_on_parameters_change(&txn_limbo);
+	raft_cfg_election_quorum(box_raft());
+}
+
 int
 box_set_replication_synchro_quorum(void)
 {
 	int value = box_check_replication_synchro_quorum();
 	if (value < 0)
 		return -1;
-	replication_synchro_quorum = value;
-	txn_limbo_on_parameters_change(&txn_limbo);
-	raft_cfg_election_quorum(box_raft());
+	set_replication_synchro_quorum(value);
 	return 0;
+}
+
+/**
+ * Renew replication_synchro_quorum value if defined
+ * as a formula and we need to recalculate it.
+ */
+void
+box_renew_replication_synchro_quorum(void)
+{
+	if (cfg_isnumber("replication_synchro_quorum"))
+		return;
+
+	/*
+	 * The formula has been verified already on the bootstrap
+	 * stage (and on dynamic reconfig as well), still there
+	 * is a Lua call inside, heck knowns what could go wrong
+	 * there thus panic if we're screwed.
+	 */
+	int value = replicaset.registered_count;
+	int quorum = eval_replication_synchro_quorum(value);
+	if (quorum < 0)
+		panic("failed to eval replication_synchro_quorum");
+	say_info("renew replication_synchro_quorum = %d", quorum);
+	set_replication_synchro_quorum(quorum);
 }
 
 int

@@ -250,6 +250,8 @@ replica_set_id(struct replica *replica, uint32_t replica_id)
 	say_info("assigned id %d to replica %s",
 		 replica->id, tt_uuid_str(&replica->uuid));
 	replica->anon = false;
+
+	box_renew_replication_synchro_quorum();
 }
 
 void
@@ -298,6 +300,8 @@ replica_clear_id(struct replica *replica)
 		assert(!replica->anon);
 		replica_delete(replica);
 	}
+
+	box_renew_replication_synchro_quorum();
 }
 
 void
