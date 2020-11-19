@@ -40,7 +40,9 @@
 #include "gc.h"
 #include "error.h"
 #include "relay.h"
+#include "raft.h"
 #include "sio.h"
+#include "txn_limbo.h"
 
 uint32_t instance_id = REPLICA_ID_NIL;
 struct tt_uuid INSTANCE_UUID;
@@ -80,6 +82,22 @@ static inline int
 replicaset_quorum(void)
 {
 	return MIN(replication_connect_quorum, replicaset.applier.total);
+}
+
+/**
+ * Update the synchro quorum number and propagate the
+ * change to dependent subsystems.
+ */
+void
+replication_synchro_quorum_update(int value)
+{
+	assert(value > 0 && value < VCLOCK_MAX);
+
+	say_info("replication: replication_synchro_quorum = %d", value);
+
+	replication_synchro_quorum = value;
+	txn_limbo_on_parameters_change(&txn_limbo);
+	raft_cfg_election_quorum(box_raft());
 }
 
 void

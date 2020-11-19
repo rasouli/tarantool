@@ -176,6 +176,9 @@ replication_disconnect_timeout(void)
 }
 
 void
+replication_synchro_quorum_update(int value);
+
+void
 replication_init(void);
 
 void
