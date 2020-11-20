@@ -28,11 +28,11 @@ os.unlink(wal)
 
 server.start()
 line="ignoring a gap in LSN"
-print "check log line for '%s'" % line
-print
+print("check log line for '%s'" % line)
+print('')
 if server.logfile_pos.seek_once(line) >= 0:
-    print "'%s' exists in server log" % line
-print
+    print("'%s' exists in server log" % line)
+print('')
 
 # missing tuple from removed xlog
 server.admin("box.space.test:select{}")

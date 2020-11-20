@@ -7,9 +7,9 @@ master = server
 master_id = master.get_param('id')
 master.admin("box.schema.user.grant('guest', 'replication')")
 
-print '-------------------------------------------------------------'
-print 'gh-484: JOIN doesn\'t save data to snapshot with TREE index'
-print '-------------------------------------------------------------'
+print('-------------------------------------------------------------')
+print('gh-484: JOIN doesn\'t save data to snapshot with TREE index')
+print('-------------------------------------------------------------')
 
 master.admin("space = box.schema.space.create('test', {id =  42})")
 master.admin("index = space:create_index('primary', { type = 'tree'})")
@@ -28,9 +28,9 @@ replica.admin('box.space.test:select()')
 replica.stop()
 replica.cleanup()
 
-print '-------------------------------------------------------------'
-print 'replica test 2 (must be ok)'
-print '-------------------------------------------------------------'
+print('-------------------------------------------------------------')
+print('replica test 2 (must be ok)')
+print('-------------------------------------------------------------')
 
 master.restart()
 master.admin('for k = 10, 19 do box.space[42]:insert{k, k*k*k} end')
@@ -51,9 +51,9 @@ for i in range(1, 20):
 replica.stop()
 replica.cleanup()
 
-print '-------------------------------------------------------------'
-print 'reconnect on JOIN/SUBSCRIBE'
-print '-------------------------------------------------------------'
+print('-------------------------------------------------------------')
+print('reconnect on JOIN/SUBSCRIBE')
+print('-------------------------------------------------------------')
 
 server.stop()
 replica = TarantoolServer(server.ini)
@@ -62,19 +62,19 @@ replica.vardir = server.vardir #os.path.join(server.vardir, 'replica')
 replica.rpl_master = master
 replica.deploy(wait=False)
 
-print 'waiting reconnect on JOIN...'
+print('waiting reconnect on JOIN...')
 server.start()
 replica.wait_until_started()
-print 'ok'
+print('ok')
 
 replica.stop()
 server.stop()
 
-print 'waiting reconnect on SUBSCRIBE...'
+print('waiting reconnect on SUBSCRIBE...')
 replica.start(wait=False)
 server.start()
 replica.wait_until_started()
-print 'ok'
+print('ok')
 
 replica.stop()
 replica.cleanup()

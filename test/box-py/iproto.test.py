@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import sys
 import struct
@@ -11,25 +13,25 @@ from lib.tarantool_connection import TarantoolConnection
 
 admin("box.schema.user.grant('guest', 'read,write,execute', 'universe')")
 
-print """
+print("""
 #
 # iproto packages test
 #
-"""
+""")
 
 # opeing new connection to tarantool/box
 conn = TarantoolConnection(server.iproto.host, server.iproto.port)
 conn.connect()
 s = conn.socket
 
-print """
+print("""
 # Test bug #899343 (server assertion failure on incorrect packet)
-"""
-print "# send the package with invalid length"
+""")
+print("# send the package with invalid length")
 invalid_request = struct.pack('<LLL', 1, 4294967290, 1)
-print s.send(invalid_request)
-print "# check that is server alive"
-print iproto.py_con.ping() > 0
+print(s.send(invalid_request))
+print("# check that is server alive")
+print(iproto.py_con.ping() > 0)
 
 # closing connection
 s.close()
@@ -50,7 +52,7 @@ def test(header, body):
     # Connect and authenticate
     c = Connection('localhost', server.iproto.port)
     c.connect()
-    print 'query', repr_dict(header), repr_dict(body)
+    print('query', repr_dict(header), repr_dict(body))
     header = msgpack.dumps(header)
     body = msgpack.dumps(body)
     query = msgpack.dumps(len(header) + len(body)) + header + body
@@ -59,36 +61,36 @@ def test(header, body):
     try:
         s.send(query)
     except OSError as e:
-        print '   => ', 'Failed to send request'
+        print('   => ', 'Failed to send request')
     c.close()
-    print iproto.py_con.ping() > 0
+    print(iproto.py_con.ping() > 0)
 
-print """
+print("""
 #  Test gh-206 "Segfault if sending IPROTO package without `KEY` field"
-"""
+""")
 
-print "IPROTO_SELECT"
+print("IPROTO_SELECT")
 test({ IPROTO_CODE : REQUEST_TYPE_SELECT }, { IPROTO_SPACE_ID: 280 })
-print "\n"
+print("\n")
 
-print "IPROTO_DELETE"
+print("IPROTO_DELETE")
 test({ IPROTO_CODE : REQUEST_TYPE_DELETE }, { IPROTO_SPACE_ID: 280 })
-print "\n"
+print("\n")
 
-print "IPROTO_UPDATE"
+print("IPROTO_UPDATE")
 test({ IPROTO_CODE : REQUEST_TYPE_UPDATE }, { IPROTO_SPACE_ID: 280 })
 test({ IPROTO_CODE : REQUEST_TYPE_UPDATE },
      { IPROTO_SPACE_ID: 280, IPROTO_KEY: (1, )})
-print "\n"
+print("\n")
 
-print "IPROTO_REPLACE"
+print("IPROTO_REPLACE")
 test({ IPROTO_CODE : REQUEST_TYPE_REPLACE }, { IPROTO_SPACE_ID: 280 })
-print "\n"
+print("\n")
 
-print "IPROTO_CALL"
+print("IPROTO_CALL")
 test({ IPROTO_CODE : REQUEST_TYPE_CALL }, {})
 test({ IPROTO_CODE : REQUEST_TYPE_CALL }, { IPROTO_KEY: ('procname', )})
-print "\n"
+print("\n")
 
 # gh-434 Tarantool crashes on multiple iproto requests with WAL enabled
 admin("box.cfg.wal_mode")
@@ -104,11 +106,11 @@ s = c._socket
 try:
     s.send(bytes(request1) + bytes(request2))
 except OSError as e:
-    print '   => ', 'Failed to send request'
+    print('   => ', 'Failed to send request')
 response1 = Response(c, c._read_response())
 response2 = Response(c, c._read_response())
-print response1.__str__()
-print response2.__str__()
+print(response1.__str__())
+print(response2.__str__())
 
 request1 = RequestInsert(c, 567, [3, "occama"])
 request2 = RequestSelect(c, 567, 0, [1], 0, 1, 0)
@@ -116,11 +118,11 @@ s = c._socket
 try:
     s.send(bytes(request1) + bytes(request2))
 except OSError as e:
-    print '   => ', 'Failed to send request'
+    print('   => ', 'Failed to send request')
 response1 = Response(c, c._read_response())
 response2 = Response(c, c._read_response())
-print response1.__str__()
-print response2.__str__()
+print(response1.__str__())
+print(response2.__str__())
 
 request1 = RequestSelect(c, 567, 0, [2], 0, 1, 0)
 request2 = RequestInsert(c, 567, [4, "ockham"])
@@ -128,11 +130,11 @@ s = c._socket
 try:
     s.send(bytes(request1) + bytes(request2))
 except OSError as e:
-    print '   => ', 'Failed to send request'
+    print('   => ', 'Failed to send request')
 response1 = Response(c, c._read_response())
 response2 = Response(c, c._read_response())
-print response1.__str__()
-print response2.__str__()
+print(response1.__str__())
+print(response2.__str__())
 
 request1 = RequestSelect(c, 567, 0, [1], 0, 1, 0)
 request2 = RequestSelect(c, 567, 0, [2], 0, 1, 0)
@@ -140,11 +142,11 @@ s = c._socket
 try:
     s.send(bytes(request1) + bytes(request2))
 except OSError as e:
-    print '   => ', 'Failed to send request'
+    print('   => ', 'Failed to send request')
 response1 = Response(c, c._read_response())
 response2 = Response(c, c._read_response())
-print response1.__str__()
-print response2.__str__()
+print(response1.__str__())
+print(response2.__str__())
 
 c.close()
 
@@ -192,27 +194,27 @@ TESTS = [
 for test in TESTS:
     it = iter(test)
     size = next(it)
-    print 'STR', size
-    print '--'
+    print('STR', size)
+    print('--')
     for fmt in it:
-        print '0x' + fmt.encode('hex'), '=>',
+        print('0x' + fmt.encode('hex'), '=>', end=" ")
         field = '*' * size
         c._send_request(RawInsert(c, space_id, "\x91" + fmt + field))
         tuple = space.select(field)[0]
-        print len(tuple[0])== size and 'ok' or 'fail',
+        print(len(tuple[0])== size and 'ok' or 'fail', end=" ")
         it2 = iter(test)
         next(it2)
         for fmt2 in it2:
             tuple = c._send_request(RawSelect(c, space_id,
                 "\x91" + fmt2 + field))[0]
-            print len(tuple[0]) == size and 'ok' or 'fail',
+            print(len(tuple[0]) == size and 'ok' or 'fail', end=" ")
         tuple = space.delete(field)[0]
-        print len(tuple[0]) == size and 'ok' or 'fail',
-        print
-    print
+        print(len(tuple[0]) == size and 'ok' or 'fail', end="")
+        print()
+    print()
 
 
-print 'Test of schema_id in iproto.'
+print('Test of schema_id in iproto.')
 c = Connection('localhost', server.iproto.port)
 c.connect()
 s = c._socket
@@ -235,7 +237,7 @@ def receive_response():
         resp_header = unpacker.unpack()
         resp_body = unpacker.unpack()
     except OSError as e:
-        print '   => ', 'Failed to recv response'
+        print('   => ', 'Failed to recv response')
     res = {}
     res['header'] = resp_header
     res['body'] = resp_body
@@ -249,7 +251,7 @@ def test_request(req_header, req_body):
     try:
         s.send(query)
     except OSError as e:
-        print '   => ', 'Failed to send request'
+        print('   => ', 'Failed to send request')
     return receive_response()
 
 header = { IPROTO_CODE : REQUEST_TYPE_SELECT}
@@ -260,31 +262,31 @@ body = { IPROTO_SPACE_ID: space_id,
     IPROTO_OFFSET: 0,
     IPROTO_LIMIT: 1 }
 resp = test_request(header, body)
-print 'Normal connect done w/o errors:', resp['header'][0] == 0
-print 'Got schema_id:', resp['header'][5] > 0
+print('Normal connect done w/o errors:', resp['header'][0] == 0)
+print('Got schema_id:', resp['header'][5] > 0)
 schema_id = resp['header'][5]
 
 header = { IPROTO_CODE : REQUEST_TYPE_SELECT, 5 : 0 }
 resp = test_request(header, body)
-print 'Zero-schema_id connect done w/o errors:', resp['header'][0] == 0
-print 'Same schema_id:', resp['header'][5] == schema_id
+print('Zero-schema_id connect done w/o errors:', resp['header'][0] == 0)
+print('Same schema_id:', resp['header'][5] == schema_id)
 
 header = { IPROTO_CODE : REQUEST_TYPE_SELECT, 5 : schema_id }
 resp = test_request(header, body)
-print 'Normal connect done w/o errors:', resp['header'][0] == 0
-print 'Same schema_id:', resp['header'][5] == schema_id
+print('Normal connect done w/o errors:', resp['header'][0] == 0)
+print('Same schema_id:', resp['header'][5] == schema_id)
 
 header = { IPROTO_CODE : REQUEST_TYPE_SELECT, 5 : schema_id + 1 }
 resp = test_request(header, body)
-print 'Wrong schema_id leads to error:', resp['header'][0] != 0
-print 'Same schema_id:', resp['header'][5] == schema_id
+print('Wrong schema_id leads to error:', resp['header'][0] != 0)
+print('Same schema_id:', resp['header'][5] == schema_id)
 
 admin("space2 = box.schema.create_space('test2')")
 
 header = { IPROTO_CODE : REQUEST_TYPE_SELECT, 5 : schema_id }
 resp = test_request(header, body)
-print 'Schema changed -> error:', resp['header'][0] != 0
-print 'Got another schema_id:', resp['header'][5] != schema_id
+print('Schema changed -> error:', resp['header'][0] != 0)
+print('Got another schema_id:', resp['header'][5] != schema_id)
 
 #
 # gh-2334 Lost SYNC in JOIN response.
@@ -298,14 +300,14 @@ if resp['header'][IPROTO_SYNC] == 2334:
     while i < 3:
         resp = receive_response()
         if resp['header'][IPROTO_SYNC] != 2334:
-            print 'Bad sync on response with number ', i
+            print('Bad sync on response with number ', i)
             break
         if resp['header'][IPROTO_CODE] == REQUEST_TYPE_OK:
             i += 1
     else:
-        print 'Sync ok'
+        print('Sync ok')
 else:
-    print 'Bad first sync'
+    print('Bad first sync')
 
 #
 # Try incorrect JOIN. SYNC must be also returned.
@@ -344,10 +346,10 @@ admin("box.schema.user.revoke('guest', 'read,write,execute', 'universe')")
 # gh-272 if the packet was incorrect, respond with an error code
 # gh-1654 do not close connnection on invalid request
 #
-print """
+print("""
 # Test bugs gh-272, gh-1654 if the packet was incorrect, respond with
 # an error code and do not close connection
-"""
+""")
 
 c = Connection('localhost', server.iproto.port)
 c.connect()
@@ -355,15 +357,15 @@ s = c._socket
 header = { "hello": "world"}
 body = { "bug": 272 }
 resp = test_request(header, body)
-print 'sync=%d, %s' % (resp['header'][IPROTO_SYNC], resp['body'].get(IPROTO_ERROR))
+print('sync=%d, %s' % (resp['header'][IPROTO_SYNC], resp['body'].get(IPROTO_ERROR)))
 header = { IPROTO_CODE : REQUEST_TYPE_SELECT }
 header[IPROTO_SYNC] = 1234
 resp = test_request(header, body)
-print 'sync=%d, %s' % (resp['header'][IPROTO_SYNC], resp['body'].get(IPROTO_ERROR))
+print('sync=%d, %s' % (resp['header'][IPROTO_SYNC], resp['body'].get(IPROTO_ERROR)))
 header[IPROTO_SYNC] = 5678
 body = { IPROTO_SPACE_ID: 304, IPROTO_KEY: [], IPROTO_LIMIT: 1 }
 resp = test_request(header, body)
-print 'sync=%d, %s' % (resp['header'][IPROTO_SYNC], resp['body'].get(IPROTO_ERROR))
+print('sync=%d, %s' % (resp['header'][IPROTO_SYNC], resp['body'].get(IPROTO_ERROR)))
 c.close()
 
 
@@ -379,32 +381,32 @@ request = RequestInsert(c, 568, [1, 0, 0, 0])
 try:
     s.send(bytes(request))
 except OSError as e:
-    print '   => ', 'Failed to send request'
+    print('   => ', 'Failed to send request')
 response = Response(c, c._read_response())
-print response.__str__()
+print(response.__str__())
 
 request = RequestUpdate(c, 568, 0, [1], [['+', 2, 1], ['-', 3, 1]])
 try:
     s.send(bytes(request))
 except OSError as e:
-    print '   => ', 'Failed to send request'
+    print('   => ', 'Failed to send request')
 response = Response(c, c._read_response())
-print response.__str__()
+print(response.__str__())
 
 request = RequestUpsert(c, 568, 0, [1, 0, 0, 0], [['+', 2, 1], ['-', 3, 1]])
 try:
     s.send(bytes(request))
 except OSError as e:
-    print '   => ', 'Failed to send request'
+    print('   => ', 'Failed to send request')
 response = Response(c, c._read_response())
 
 request = RequestSelect(c, 568, 0, [1], 0, 1, 0)
 try:
     s.send(bytes(request))
 except OSError as e:
-    print '   => ', 'Failed to send request'
+    print('   => ', 'Failed to send request')
 response = Response(c, c._read_response())
-print response.__str__()
+print(response.__str__())
 
 c.close()
 
@@ -421,8 +423,8 @@ s = c._socket
 header = { IPROTO_CODE: REQUEST_TYPE_CALL, IPROTO_SYNC: 100 }
 body = { IPROTO_FUNCTION_NAME: 'kek' }
 resp = test_request(header, body)
-print "Sync: ", resp['header'][IPROTO_SYNC]
-print "Retcode: ", resp['body'][IPROTO_DATA]
+print("Sync: ", resp['header'][IPROTO_SYNC])
+print("Retcode: ", resp['body'][IPROTO_DATA])
 
 c.close()
 

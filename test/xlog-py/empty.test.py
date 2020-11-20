@@ -20,7 +20,7 @@ f.close()
 server.start()
 server.stop()
 if os.access(filename, os.F_OK):
-    print ".xlog exists"
+    print(".xlog exists")
 # the server has started but is crippled since it
 # can't override an existing file
 server.start()

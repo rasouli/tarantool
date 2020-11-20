@@ -16,8 +16,8 @@ replica.rpl_master = master
 replica.deploy()
 
 def parallel_run(cmd1, cmd2, compare):
-    print 'parallel send: %s' % cmd1
-    print 'parallel send: %s' % cmd2
+    print('parallel send: %s' % cmd1)
+    print('parallel send: %s' % cmd2)
     master.admin.socket.sendall('%s\n' % cmd1)
     replica.admin.socket.sendall('%s\n' % cmd2)
 
@@ -37,11 +37,11 @@ def parallel_run(cmd1, cmd2, compare):
     while True:
         sleep(0.01)
         if any(results):
-            print 'replication state is correct'
+            print('replication state is correct')
             break
 
 def prepare_cluster():
-    print 'reset master-master replication'
+    print('reset master-master replication')
     master.stop()
     master.cleanup()
     master.start()

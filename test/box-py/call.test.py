@@ -21,11 +21,11 @@ call("f1")
 # IPROTO required!
 call("box.error", 33333, 'Hey!')
 
-print """
+print("""
 # A test case for Bug#103491
 # server CALL processing bug with name path longer than two
 # https://bugs.launchpad.net/tarantool/+bug/1034912
-"""
+""")
 admin("f = function() return 'OK' end")
 admin("test = {}")
 admin("test.f = f")
@@ -35,11 +35,11 @@ call("f")
 call("test.f")
 call("test.test.f")
 
-print """
+print("""
 # Test for Bug #955226
 # Lua Numbers are passed back wrongly as strings
 #
-"""
+""")
 admin("function foo() return 1, 2, '1', '2' end")
 call("foo")
 
@@ -136,14 +136,14 @@ admin("index = space:create_index('primary', { type = 'tree' })")
 
 
 def lua_eval(name, *args):
-    print 'eval (%s)(%s)' % (name, ','.join([ str(arg) for arg in args]))
-    print '---'
-    print iproto.py_con.eval(name, args)
+    print('eval (%s)(%s)' % (name, ','.join([ str(arg) for arg in args])))
+    print('---')
+    print(iproto.py_con.eval(name, args))
 
 def lua_call(name, *args):
-    print 'call %s(%s)' % (name, ','.join([ str(arg) for arg in args]))
-    print '---'
-    print iproto.py_con.call(name, args)
+    print('call %s(%s)' % (name, ','.join([ str(arg) for arg in args])))
+    print('---')
+    print(iproto.py_con.call(name, args))
 
 def test(expr, *args):
     lua_eval('return ' + expr, *args)

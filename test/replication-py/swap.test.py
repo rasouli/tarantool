@@ -15,18 +15,18 @@ engines = ['memtx', 'vinyl']
 def insert_tuples(_server, begin, end, msg = "tuple"):
     for engine in engines:
         for i in range(begin, end):
-            print 'box.space.%s:insert{%d, "%s %d"}' % (engine, i, msg, i)
-            print '-'
+            print('box.space.%s:insert{%d, "%s %d"}' % (engine, i, msg, i))
+            print('-')
             space = _server.iproto.py_con.space(engine)
-            print space.insert((i, '%s %d' % (msg, i)))
+            print(space.insert((i, '%s %d' % (msg, i))))
 
 def select_tuples(_server, begin, end):
     for engine in engines:
         for i in range(begin, end):
-            print 'box.space.%s:select{%d}' % (engine, i)
-            print '-'
+            print('box.space.%s:select{%d}' % (engine, i))
+            print('-')
             space = _server.iproto.py_con.space(engine)
-            print space.select(i)
+            print(space.select(i))
 
 # master server
 master = server
@@ -59,14 +59,14 @@ for engine in engines:
 #host_port = "%s:%s" % master.iproto.uri
 #m = re.search(r'replica/(.*)/.*', status)
 #if not m or m.group(1) != host_port:
-#    print 'invalid box.info.status', status, 'expected host:port', host_port
+#    print('invalid box.info.status', status, 'expected host:port', host_port)
 
 master_id = master.get_param('id')
 replica_id = replica.get_param('id')
 
 id = ID_BEGIN
 for i in range(REPEAT):
-    print "test %d iteration" % i
+    print("test %d iteration" % i)
 
     # insert to master
     insert_tuples(master, id, id + ID_STEP)
@@ -82,7 +82,7 @@ for i in range(REPEAT):
     select_tuples(replica, id, id + ID_STEP)
     id += ID_STEP
 
-    print "swap servers"
+    print("swap servers")
     # reconfigure replica to master
     replica.rpl_master = None
     print("switch replica to master")
@@ -106,7 +106,7 @@ for i in range(REPEAT):
     select_tuples(master, id, id + ID_STEP)
     id += ID_STEP
 
-    print "rollback servers configuration"
+    print("rollback servers configuration")
     # reconfigure replica to master
     master.rpl_master = None
     print("switch master to master")
