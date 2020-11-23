@@ -148,6 +148,7 @@ set(api_headers
     ${CMAKE_SOURCE_DIR}/src/box/tuple.h
     ${CMAKE_SOURCE_DIR}/src/box/key_def.h
     ${CMAKE_SOURCE_DIR}/src/box/lua/key_def.h
+    ${CMAKE_SOURCE_DIR}/src/box/lua/module.h
     ${CMAKE_SOURCE_DIR}/src/box/field_def.h
     ${CMAKE_SOURCE_DIR}/src/box/tuple_format.h
     ${CMAKE_SOURCE_DIR}/src/box/tuple_extract_key.h

@@ -2926,6 +2926,7 @@ loop_init (EV_P_ unsigned int flags) EV_THROW
       pipe_write_wanted  = 0;
       evpipe [0]         = -1;
       evpipe [1]         = -1;
+      pipe_w.fd          = -1;
 #if EV_USE_INOTIFY
       fs_fd              = flags & EVFLAG_NOINOTIFY ? -1 : -2;
 #endif
@@ -4050,6 +4051,37 @@ ev_tstamp
 ev_timer_remaining (EV_P_ ev_timer *w) EV_THROW
 {
   return ev_at (w) - (ev_is_active (w) ? mn_now : 0.);
+}
+
+int
+ev_get_pipew(EV_P)
+{
+  return pipe_w.fd;
+}
+
+int
+ev_prepare_extern_loop_wait(EV_P)
+{
+  fd_reify (EV_A);
+  pipe_write_wanted = 1;
+  ECB_MEMORY_FENCE;
+  if (expect_true (!pipe_write_skipped))
+    return 1;
+  return 0;
+}
+
+void
+ev_process_events(EV_P_ int fd, int revents)
+{
+  fd_event (EV_A_ fd, revents);
+  pipe_write_wanted = 0; /* just an optimisation, no fence needed */
+  ECB_MEMORY_FENCE_ACQUIRE;
+  if (pipe_write_skipped)
+    {
+      assert (("libev: pipe_w not active, but pipe not written", ev_is_active (&pipe_w)));
+      ev_feed_event (EV_A_ &pipe_w, EV_CUSTOM);
+    }
+  EV_INVOKE_PENDING;
 }
 
 #if EV_PERIODIC_ENABLE

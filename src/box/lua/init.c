@@ -64,6 +64,7 @@
 #include "box/lua/execute.h"
 #include "box/lua/key_def.h"
 #include "box/lua/merger.h"
+#include "box/lua/module.h"
 
 #include "mpstream/mpstream.h"
 
@@ -471,6 +472,7 @@ box_lua_init(struct lua_State *L)
 	box_lua_sequence_init(L);
 	box_lua_misc_init(L);
 	box_lua_info_init(L);
+	box_lua_module_init(L);
 	box_lua_stat_init(L);
 	box_lua_ctl_init(L);
 	box_lua_session_init(L);

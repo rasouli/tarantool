@@ -33,6 +33,7 @@
 #include "trivia/config.h"
 
 #include "lua/utils.h" /* lua_hash() */
+#include "lua/module.h"
 #include "fiber_pool.h"
 #include <say.h>
 #include <scoped_guard.h>
@@ -2250,6 +2251,7 @@ box_free(void)
 		tuple_free();
 		port_free();
 #endif
+		unload_all_active_module();
 		box_raft_free();
 		iproto_free();
 		replication_free();

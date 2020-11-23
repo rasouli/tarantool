@@ -780,6 +780,12 @@ EV_API_DECL void ev_timer_stop     (EV_P_ ev_timer *w) EV_THROW;
 EV_API_DECL void ev_timer_again    (EV_P_ ev_timer *w) EV_THROW;
 /* return remaining time */
 EV_API_DECL ev_tstamp ev_timer_remaining (EV_P_ ev_timer *w) EV_THROW;
+/* get pipe_w file descriptor */
+EV_API_DECL int ev_get_pipew(EV_P);
+/* prepare liveb fds to external loop */
+EV_API_DECL int ev_prepare_extern_loop_wait(EV_P);
+/* process events getting in other loop */
+EV_API_DECL void ev_process_events(EV_P_ int fd, int revents);
 
 #if EV_PERIODIC_ENABLE
 EV_API_DECL void ev_periodic_start (EV_P_ ev_periodic *w) EV_THROW;
