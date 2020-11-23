@@ -24,16 +24,16 @@ replica.rpl_master = master
 replica.deploy()
 replica.admin('box.space.test:select()')
 
-replica.restart(signal=9)
+replica.restart()
 replica.admin('box.space.test:select()')
-replica.stop(signal=9)
+replica.stop()
 replica.cleanup()
 
 print '-------------------------------------------------------------'
 print 'replica test 2 (must be ok)'
 print '-------------------------------------------------------------'
 
-master.restart(signal=9)
+master.restart()
 master.admin('for k = 10, 19 do box.space[42]:insert{k, k*k*k} end')
 master.admin("for k = 20, 29 do box.space[42]:upsert({k}, {}) end")
 lsn = master.get_lsn(master_id)
@@ -49,14 +49,14 @@ replica.wait_lsn(master_id, lsn)
 for i in range(1, 20):
     replica.admin('space:get{%d}' % i)
 
-replica.stop(signal=9)
+replica.stop()
 replica.cleanup()
 
 print '-------------------------------------------------------------'
 print 'reconnect on JOIN/SUBSCRIBE'
 print '-------------------------------------------------------------'
 
-server.stop(signal=9)
+server.stop()
 replica = TarantoolServer(server.ini)
 replica.script = 'replication-py/replica.lua'
 replica.vardir = server.vardir #os.path.join(server.vardir, 'replica')
@@ -77,8 +77,8 @@ except TarantoolStartError:
 else:
     print 'ok'
 
-replica.stop(signal=9)
-server.stop(signal=9)
+replica.stop()
+server.stop()
 
 print 'waiting reconnect on SUBSCRIBE...'
 replica.start(wait=False)
@@ -95,8 +95,8 @@ except TarantoolStartError:
 else:
     print 'ok'
 
-replica.stop(signal=9)
+replica.stop()
 replica.cleanup()
 
-server.stop(signal=9)
+server.stop()
 server.deploy()
