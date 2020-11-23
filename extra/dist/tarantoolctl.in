@@ -70,6 +70,9 @@ local function check_user_level()
     local pwd = os.getenv('PWD')
     local udir = pwd and pwd .. '/.tarantoolctl'
     udir = udir and fio.stat(udir) and udir or nil
+    -- or test-run dir
+    udir = udir or pwd and pwd .. '/../test-run/.tarantoolctl'
+    udir = udir and fio.stat(udir) and udir or nil
     -- or home dir configuration
     local homedir = os.getenv('HOME')
     udir = udir or homedir and homedir .. '/.config/tarantool/tarantool'
