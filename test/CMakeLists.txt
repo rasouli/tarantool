@@ -80,10 +80,17 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/luajit/test
 
 # Move tarantoolctl config
 if (NOT ${PROJECT_BINARY_DIR} STREQUAL ${PROJECT_SOURCE_DIR})
-    configure_file(
-        "${PROJECT_SOURCE_DIR}/test/.tarantoolctl"
-        "${PROJECT_BINARY_DIR}/test/.tarantoolctl"
+    if(EXISTS "${PROJECT_SOURCE_DIR}/test/.tarantoolctl")
+        configure_file(
+            "${PROJECT_SOURCE_DIR}/test/.tarantoolctl"
+            "${PROJECT_BINARY_DIR}/test/.tarantoolctl"
         )
+    else()
+        configure_file(
+            "${PROJECT_SOURCE_DIR}/test-run/.tarantoolctl"
+            "${PROJECT_BINARY_DIR}/test/.tarantoolctl"
+        )
+    endif()
 endif()
 
 # Disable connector_c for 1.6
