@@ -1,0 +1,1 @@
+/home/cyrill/projects/tarantool/tarantool.git/test/replication/replica-quorum.lua
