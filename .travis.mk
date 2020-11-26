@@ -134,7 +134,8 @@ build_coverage_debian:
 
 test_coverage_debian_no_deps: build_coverage_debian
 	# Enable --long tests for coverage
-	cd test && /usr/bin/python test-run.py --force $(TEST_RUN_EXTRA_PARAMS) --long
+	cd test && /usr/bin/python test-run.py --force $(TEST_RUN_EXTRA_PARAMS) --long \
+		--test-timeout 180 --no-output-timeout 240
 	lcov --compat-libtool --directory src/ --capture --output-file coverage.info.tmp \
 		--rc lcov_branch_coverage=1 --rc lcov_function_coverage=1
 	lcov --compat-libtool --remove coverage.info.tmp 'tests/*' 'third_party/*' '/usr/*' \
@@ -221,7 +222,8 @@ test_oos_no_deps: build_oos
 	cd ${OOS_BUILD_PATH}/test && \
 		${OOS_SRC_PATH}/test/test-run.py \
 			--builddir ${OOS_BUILD_PATH} \
-			--vardir ${OOS_BUILD_PATH}/test/var --force
+			--vardir ${OOS_BUILD_PATH}/test/var --force \
+			--test-timeout 180 --no-output-timeout 240
 
 test_oos: deps_debian test_oos_no_deps
 
